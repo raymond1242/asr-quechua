@@ -1,4 +1,8 @@
 FROM python:3.11
+
 RUN apt-get update && apt-get install -y libsndfile1
-RUN pip install omnilingual-asr jiwer
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 WORKDIR /workspace
