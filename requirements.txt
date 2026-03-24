@@ -1,4 +1,5 @@
-omnilingual-asr
+# En Linux/Docker sin GPU, instala según el Dockerfile (orden torch CPU + fairseq2 índice Meta).
+omnilingual-asr==0.2.0
 jiwer
 soundfile
 numpy

@@ -132,12 +132,7 @@ El script transcribe cada audio, calcula el CER frente a la referencia y al fina
 
 ## Dockerfile
 
-```dockerfile
-FROM --platform=linux/amd64 python:3.11
-RUN apt-get update && apt-get install -y libsndfile1
-RUN pip install omnilingual-asr jiwer
-WORKDIR /workspace
-```
+La imagen fija **PyTorch 2.8.0 + torchaudio (CPU)**, instala **fairseq2** usando el índice de Meta `…/pt2.8.0/cpu` como **índice principal** (si solo se usa `--extra-index-url`, pip suele quedarse con el wheel CUDA de PyPI), y luego **omnilingual-asr** con `--no-deps` para que no vuelva a subir PyTorch. El detalle está en el `Dockerfile`.
 
 ## Docker Quick Reference
 
@@ -164,3 +159,6 @@ These are harmless — caused by x86 emulation on Apple Silicon. They do not aff
 - **`Killed` during model loading:** Increase Docker memory in Docker Desktop → Settings → Resources (16 GB minimum recommended).
 - **Empty `/workspace` in container:** Make sure you're using the full, quoted path in the `-v` flag.
 - **`fairseq2n` install errors:** Ensure you're building with `--platform linux/amd64`.
+- **`OSError: libcudart.so.*`:** PyTorch/torchaudio con CUDA dentro de un contenedor sin bibliotecas NVIDIA. Reconstruye la imagen con el `Dockerfile` actual (fija PyTorch CPU y fairseq2 variante CPU).
+- **`fairseq2 requires a CUDA … build of PyTorch … but the installed version is CPU-only`:** Ocurre si solo se fuerza PyTorch CPU con una versión distinta (p. ej. 2.11) pero `fairseq2n` de PyPI sigue siendo la variante CUDA para otra versión. El `Dockerfile` reinstala **torch 2.8.0 + torchaudio 2.8.0 (CPU)** y **fairseq2** desde `https://fair.pkg.atmeta.com/fairseq2/whl/pt2.8.0/cpu`. Tras cambios, haz `docker build --platform linux/amd64 --no-cache -t quechua-asr .`.
+- **GPU:** Si tienes NVIDIA y quieres CUDA, usa imagen con runtime CUDA compatible, `docker run --gpus all ...`, e instala PyTorch + variante fairseq2 `cu128`/`cu126` según [fairseq2#variants](https://github.com/facebookresearch/fairseq2#variants) (no uses el truco CPU del Dockerfile).
