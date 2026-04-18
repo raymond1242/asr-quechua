@@ -14,6 +14,14 @@ MIN_SILENCE_DURATION = 0.25  # seconds
 MIN_SOUNDING_DURATION = 0.2  # seconds
 
 
+def _format_ts(seconds):
+    h = int(seconds // 3600)
+    m = int((seconds % 3600) // 60)
+    s = int(seconds % 60)
+    ms = int(round((seconds - int(seconds)) * 1000))
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
 def main():
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
@@ -37,9 +45,10 @@ def main():
             "silent", "sounding",
         )
 
-        # Extract sounding segments
+        # Extract sounding segments and build SRT entries
         n_intervals = call(textgrid, "Get number of intervals...", 1)
         segment_idx = 1
+        srt_lines = []
 
         for i in range(1, n_intervals + 1):
             label = call(textgrid, "Get label of interval...", 1, i)
@@ -52,11 +61,18 @@ def main():
 
             out_path = os.path.join(audio_out_folder, f"{name}_seg{segment_idx:03d}.wav")
             segment.save(out_path, "WAV")
+
+            srt_lines.append(f"{segment_idx}\n{_format_ts(start)} --> {_format_ts(end)}\n\n")
             segment_idx += 1
+
+        # Write SRT file
+        srt_path = os.path.join(audio_out_folder, f"{name}.srt")
+        with open(srt_path, "w", encoding="utf-8") as f:
+            f.writelines(srt_lines)
 
         print(f"{filename}: {segment_idx - 1} segments")
 
-    print("Done.")
+    print("Processing completed.")
 
 
 if __name__ == "__main__":
