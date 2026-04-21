@@ -89,3 +89,12 @@ ehthumbs.db
 # *.ckpt
 # *.wav
 # *.webm
+
+# Audio y video folders
+webm_audios
+partitioned_audios
+
+# Transcripciones
+transcription_srt
+transcription_tsv
+audios_srt
