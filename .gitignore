@@ -98,3 +98,4 @@ partitioned_audios
 transcription_srt
 transcription_tsv
 audios_srt
+segmented_audios_auto
